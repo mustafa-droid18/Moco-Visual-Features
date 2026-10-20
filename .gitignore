@@ -1,0 +1,8 @@
+.DS_Store
+data/pretrain/
+.venv/
+__pycache__
+checkpoints/
+test1/
+test2/
+submissions/
