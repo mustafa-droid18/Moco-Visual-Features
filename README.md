@@ -1,9 +1,11 @@
 # Self-Supervised Visual Representation Learning with MoCo v2
 
-A ResNet-50 encoder pretrained on a large unlabeled image set with [MoCo v2](https://arxiv.org/abs/2003.04297), then evaluated with a frozen-encoder linear probe on CUB-200, MiniImageNet and SUN397.
+> A self-supervised computer vision pipeline that learns transferable image representations from unlabeled data using MoCo v2 and ResNet-50.
 
 ![Python](https://img.shields.io/badge/Python-3.x-3776AB?logo=python&logoColor=white)
 ![PyTorch](https://img.shields.io/badge/PyTorch-Deep%20Learning-EE4C2C?logo=pytorch&logoColor=white)
+![Torchvision](https://img.shields.io/badge/Torchvision-Computer%20Vision-9658B2)
+![CUDA](https://img.shields.io/badge/CUDA-GPU%20Training-76B900?logo=nvidia&logoColor=white)
 ![MoCo v2](https://img.shields.io/badge/Method-MoCo%20v2-2E8B57)
 ![ResNet-50](https://img.shields.io/badge/Backbone-ResNet--50-6A5ACD)
 
@@ -12,6 +14,29 @@ A ResNet-50 encoder pretrained on a large unlabeled image set with [MoCo v2](htt
 Labeled data is expensive to collect. This project learns an image encoder without any labels by pulling together two augmented views of the same image and pushing apart views of different images (contrastive learning). MoCo makes this scale with small batches by keeping a large queue of negatives and encoding them with a slowly moving momentum encoder.
 
 After pretraining, the encoder is frozen. Features are extracted from the downstream datasets and a logistic-regression classifier is trained on top, so the numbers below measure representation quality, not fine-tuning.
+
+## Key Results
+
+| Setting | Result |
+|---|---:|
+| Backbone | **ResNet-50** |
+| Pretraining duration | **200 epochs** |
+| Pretraining image size | **96 × 96** |
+| Memory queue | **65,536 representations** |
+| Evaluation datasets | **MiniImageNet, CUB-200, SUN397** |
+| Best validation accuracy | **67.97% on MiniImageNet** |
+
+The learned representations transfer across datasets without any fine-tuning of the encoder.
+
+## Problem Formulation
+
+Supervised image classification depends on large labeled datasets, but high-quality labels are expensive. This project instead learns an encoder:
+
+```text
+image -> visual embedding
+```
+
+For two augmented views of the same image, the objective keeps their embeddings similar, while embeddings of unrelated images act as negatives. The resulting feature space can be reused for downstream tasks with limited labeled data.
 
 ## Method
 
@@ -34,6 +59,12 @@ All of these live in [`configs/moco_r50_96.yaml`](configs/moco_r50_96.yaml).
 5. Retrain on train + validation with the chosen `C` and predict the test split.
 
 Features are extracted either at the native 96 px or with the images upsampled to 128 px before they reach the frozen encoder.
+
+### Evaluation datasets
+
+- **MiniImageNet:** a compact benchmark for general object-level transfer.
+- **CUB-200:** fine-grained bird classification, testing whether the features capture subtle visual differences.
+- **SUN397:** scene recognition, testing transfer beyond object-centered images.
 
 ## Results
 
